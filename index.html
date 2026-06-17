@@ -3,45 +3,58 @@
 <head>
     <base target="_top">
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://img2.pic.in.th/ckd_favicon_circle.png">
-
     <title>CKD</title>
-
     <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
-
-        html,
-        body{
-            width:100%;
-            height:100%;
-            overflow:hidden;
-            background:#f5f6fa;
-        }
-
-        iframe{
-            display:block;
-            width:100vw;
-            height:100vh;
-            border:none;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { width:100%; height:100%; overflow:hidden; background:#f5f6fa; }
+        iframe { display:block; width:100vw; height:100vh; border:none; }
     </style>
 </head>
-
 <body>
+    <iframe
+        id="appFrame"
+        scrolling="yes"
+        allow="geolocation; camera; microphone"
+        src="https://script.google.com/macros/s/AKfycbyflmRtH92nvXgOt8JshHEvzUxEL4pv_mlM4-uhOQVq46npRWBwNPuHx0vL5-Lb_JtQ/exec">
+    </iframe>
 
-<iframe
-    scrolling="yes"
-    allow="geolocation; camera; microphone"
-    src="https://script.google.com/macros/s/AKfycbyflmRtH92nvXgOt8JshHEvzUxEL4pv_mlM4-uhOQVq46npRWBwNPuHx0vL5-Lb_JtQ/exec">
-</iframe>
+    <script>
+    const frame = document.getElementById('appFrame');
 
+    // รับคำขอ geolocation จาก iframe
+    window.addEventListener('message', function(e) {
+        if (!e.data || e.data.type !== 'REQUEST_GEOLOCATION') return;
+
+        if (!navigator.geolocation) {
+            frame.contentWindow.postMessage({
+                type: 'GEOLOCATION_ERROR',
+                code: 0,
+                message: 'Browser ไม่รองรับ Geolocation'
+            }, '*');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                frame.contentWindow.postMessage({
+                    type: 'GEOLOCATION_SUCCESS',
+                    latitude:  pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    accuracy:  pos.coords.accuracy
+                }, '*');
+            },
+            function(err) {
+                frame.contentWindow.postMessage({
+                    type: 'GEOLOCATION_ERROR',
+                    code: err.code,
+                    message: err.message
+                }, '*');
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    });
+    </script>
 </body>
 </html>
