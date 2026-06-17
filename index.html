@@ -21,9 +21,12 @@
     </iframe>
 
     <script>
-    const frame = document.getElementById('appFrame');
+    // ถ้าเปิดตรงจาก GitHub Pages (ไม่ใช่ Apps Script) จะมี iframe
+    // ถ้าเปิดตรงจาก Apps Script จะไม่มี iframe → script นี้ไม่ทำงานก็ได้
 
-    // รับคำขอ geolocation จาก iframe
+    const frame = document.getElementById('appFrame');
+    if (!frame) return; // safety
+
     window.addEventListener('message', function(e) {
         if (!e.data || e.data.type !== 'REQUEST_GEOLOCATION') return;
 
